@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Sample App</string>
+    <string name="failure_network_connection">No Network Connection.</string>
+    <string name="failure_server_error">Server Error</string>
+    <string name="failure_location_error">Need Location Access to Use this App</string>
+
+    <string name="open_settings">Open Settings</string>
+
+    <string name="weather_forecast">Weather ForeCast</string>
+    <string name="weather_icon">http://openweathermap.org/img/wn/%1$s@2x.png</string>
+</resources>

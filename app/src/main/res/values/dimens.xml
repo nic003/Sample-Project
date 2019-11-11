@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="item_game_width">150dp</dimen>
+    <dimen name="item_game_height">130dp</dimen>
+
+    <dimen name="game_card_radius">5dp</dimen>
+    <dimen name="side_margin">8dp</dimen>
+    <dimen name="side_padding">16dp</dimen>
+    <dimen name="card_elevation">3dp</dimen>
+
+    <dimen name="image_raduis">24dp</dimen>
+
+    <dimen name="bottom_tags_height">100dp</dimen>
+
+    <dimen name="label_text_size">16sp</dimen>
+</resources>
