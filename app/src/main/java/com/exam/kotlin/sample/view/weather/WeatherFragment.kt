@@ -149,12 +149,10 @@ class WeatherFragment : BaseFragment() {
 
         val dayTime = forecast?.get(DataParams.DAY_TIME)?.asLong
 
-        println(dayTime.toString())
-
-        val dateFormat = SimpleDateFormat("E, dd MMM yyyy hh:mm", Locale.getDefault())
+        val dateFormat = SimpleDateFormat("E, dd MMM yyyy hh:mm a", Locale.getDefault())
 
         if (dayTime != null) {
-            val date = Date(dayTime)
+            val date = Date(dayTime * 1000)
             day_time.text = getString(R.string.day_time, dateFormat.format(date))
         }
 
@@ -166,12 +164,12 @@ class WeatherFragment : BaseFragment() {
         val sunsetTime = system?.get(DataParams.SUNSET)?.asLong
 
         if (sunriseTime != null) {
-            val date = Date(sunriseTime)
+            val date = Date(sunriseTime * 1000)
             sunrise.text = getString(R.string.sunrise, dateFormat.format(date))
         }
 
         if (sunsetTime != null) {
-            val date = Date(sunsetTime)
+            val date = Date(sunsetTime * 1000)
             sunset.text = getString(R.string.sunset, dateFormat.format(date))
         }
 
