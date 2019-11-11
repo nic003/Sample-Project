@@ -8,4 +8,27 @@
 
     <string name="weather_forecast">Weather ForeCast</string>
     <string name="weather_icon">http://openweathermap.org/img/wn/%1$s@2x.png</string>
+
+    <string name="failure_location_settings">Turn on or enable Location Settings</string>
+
+    <string name="weather_icon_label">Weather Icon</string>
+
+    <string name="city_name">City Name: %1$s</string>
+    <string name="main">Main: %1$s</string>
+    <string name="description">Description: %1$s</string>
+
+    <string name="temp">Temperature: %1$s</string>
+    <string name="pressure">Pressure: %1$s</string>
+    <string name="humidity">Humidity: %1$s</string>
+    <string name="temp_min">Temperature Min: %1$s</string>
+    <string name="temp_max">Temperature Max: %1$s</string>
+
+    <string name="wind_speed">Wind Speed: %1$s</string>
+    <string name="wind_deg">Wind Deg: %1$s</string>
+
+
+    <string name="day_time">Day Time: %1$s</string>
+    <string name="country">Country: %1$s</string>
+    <string name="sunrise">Sunrise: %1$s</string>
+    <string name="sunset">Sunset: %1$s</string>
 </resources>

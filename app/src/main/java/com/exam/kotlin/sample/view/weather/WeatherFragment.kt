@@ -2,12 +2,15 @@ package com.exam.kotlin.sample.view.weather
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Context.LOCATION_SERVICE
 import android.content.Intent
+import android.location.LocationManager
 import android.os.Bundle
 import android.provider.Settings
 import androidx.annotation.StringRes
 import com.exam.kotlin.sample.R
 import com.exam.kotlin.sample.base.BaseFragment
+import com.exam.kotlin.sample.base.NetworkHandler
 import com.exam.kotlin.sample.data.DataParams
 import com.exam.kotlin.sample.data.LocationInfo
 import com.exam.kotlin.sample.exemption.Failure
@@ -17,6 +20,8 @@ import com.google.android.gms.location.LocationServices
 import com.google.gson.JsonObject
 import com.tbruyelle.rxpermissions2.RxPermissions
 import kotlinx.android.synthetic.main.fragment_weather.*
+import java.text.SimpleDateFormat
+import java.util.*
 import javax.inject.Inject
 
 
@@ -28,9 +33,12 @@ class WeatherFragment : BaseFragment() {
     @Inject
     lateinit var weatherViewModel: WeatherViewModel
 
-    lateinit var rxPermissions: RxPermissions
+    @Inject
+    lateinit var networkHandler: NetworkHandler
 
-    lateinit var fusedLocationClient: FusedLocationProviderClient
+    private lateinit var rxPermissions: RxPermissions
+
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     override fun layoutId() = R.layout.fragment_weather
 
@@ -61,6 +69,13 @@ class WeatherFragment : BaseFragment() {
         rxPermissions.request(Manifest.permission.ACCESS_FINE_LOCATION)
             .subscribe { granted ->
                 if (granted) {
+
+                    val locationServices =
+                        activity?.getSystemService(LOCATION_SERVICE) as LocationManager
+
+                    val locationEnable =
+                        locationServices.isProviderEnabled(LocationManager.GPS_PROVIDER)
+
                     fusedLocationClient.lastLocation.addOnSuccessListener { location ->
                         if (location != null) {
                             val locationInfo = LocationInfo(
@@ -69,6 +84,20 @@ class WeatherFragment : BaseFragment() {
                             )
 
                             weatherViewModel.loadForecast(locationInfo)
+                        } else {
+                            when (networkHandler.isConnected) {
+                                true -> {
+                                    if (!locationEnable) {
+                                        notifyWithAction(
+                                            R.string.failure_location_settings,
+                                            R.string.open_settings,
+                                            action = {
+                                                this.startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+                                            })
+                                    }
+                                }
+                                false, null -> handleFailure(Failure.NetworkConnection)
+                            }
                         }
                     }
 
@@ -84,19 +113,68 @@ class WeatherFragment : BaseFragment() {
     }
 
     private fun handleForecast(forecast: JsonObject?) {
-        val cityName = forecast?.get(DataParams.CITY_NAME)?.asString
-
         val weather = forecast?.getAsJsonArray(DataParams.WEATHER)
-
         val current = weather?.get(0)?.asJsonObject
 
-        val description = current?.get(DataParams.DESC)?.asString
-        val icon = current?.get(DataParams.ICON)?.asString
+        val main = forecast?.getAsJsonObject(DataParams.MAIN)
+        val wind = forecast?.getAsJsonObject(DataParams.WIND)
 
-        city_name.text = cityName
-        weather_desc.text = description
+        weather_icon.loadFromUrl(
+            getString(
+                R.string.weather_icon,
+                current?.get(DataParams.ICON)?.asString
+            )
+        )
 
-        weather_icon.loadFromUrl(getString(R.string.weather_icon, icon))
+        city_name.text =
+            getString(R.string.city_name, forecast?.get(DataParams.CITY_NAME)?.asString)
+        weather_main.text = getString(R.string.main, current?.get(DataParams.MAIN)?.asString)
+        weather_desc.text = getString(R.string.description, current?.get(DataParams.DESC)?.asString)
+
+        weather_temp.text =
+            getString(R.string.temp, main?.get(DataParams.TEMP)?.asDouble?.toString())
+        weather_pressure.text =
+            getString(R.string.pressure, main?.get(DataParams.PRESSURE)?.asInt?.toString())
+        weather_humidity.text =
+            getString(R.string.humidity, main?.get(DataParams.HUMIDITY)?.asInt?.toString())
+        weather_tempMin.text =
+            getString(R.string.temp_min, main?.get(DataParams.TEMP_MIN)?.asDouble?.toString())
+        weather_tempMax.text =
+            getString(R.string.temp_max, main?.get(DataParams.TEMP_MAX)?.asDouble?.toString())
+
+        wind_speed.text =
+            getString(R.string.wind_speed, wind?.get(DataParams.WIND_SPEED)?.asDouble?.toString())
+        wind_deg.text =
+            getString(R.string.wind_deg, wind?.get(DataParams.WIND_DEG)?.asInt?.toString())
+
+        val dayTime = forecast?.get(DataParams.DAY_TIME)?.asLong
+
+        println(dayTime.toString())
+
+        val dateFormat = SimpleDateFormat("E, dd MMM yyyy hh:mm", Locale.getDefault())
+
+        if (dayTime != null) {
+            val date = Date(dayTime)
+            day_time.text = getString(R.string.day_time, dateFormat.format(date))
+        }
+
+        val system = forecast?.getAsJsonObject(DataParams.SYS)
+
+        country.text = getString(R.string.country, system?.get(DataParams.COUNTRY)?.asString)
+
+        val sunriseTime = system?.get(DataParams.SUNRISE)?.asLong
+        val sunsetTime = system?.get(DataParams.SUNSET)?.asLong
+
+        if (sunriseTime != null) {
+            val date = Date(sunriseTime)
+            sunrise.text = getString(R.string.sunrise, dateFormat.format(date))
+        }
+
+        if (sunsetTime != null) {
+            val date = Date(sunsetTime)
+            sunset.text = getString(R.string.sunset, dateFormat.format(date))
+        }
+
     }
 
     private fun handleFailure(failure: Failure?) {
